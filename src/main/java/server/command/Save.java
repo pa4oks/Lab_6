@@ -1,25 +1,19 @@
 package server.command;
 
-import server.command.base.Command;
-import files.CSVCollectionManager;
+import server.collection.CollectionManager;
+import shared.dto.Response;
 
-public class Save extends Command {
+public class Save {
+    private final CollectionManager collectionManager;
 
-    private final CSVCollectionManager csvCollectionManager;
-
-    public Save(CSVCollectionManager csvCollectionManager) {
-        super("save");
-        this.csvCollectionManager = csvCollectionManager;
+    public Save(CollectionManager collectionManager) {
+        this.collectionManager = collectionManager;
     }
 
-    @Override
-    public void execute() throws IllegalAccessException {
-        csvCollectionManager.saveDataToFile(false); // false = перезапись
-        System.out.println("Коллекция сохранена в файл.");
-    }
-
-    @Override
-    public String getHelp() {
-        return "сохранить коллекцию в файл";
+    public Response execute() {
+        boolean success = collectionManager.saveDataToFile(false);
+        return success
+                ? new Response(Response.Status.OK, "Коллекция сохранена")
+                : new Response(Response.Status.ERROR, "Ошибка при сохранении");
     }
 }

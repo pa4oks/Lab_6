@@ -1,20 +1,10 @@
 package server.command;
-import server.command.base.Command;
 
-public class Exit extends Command {
+import shared.dto.Response;
 
-    public Exit() {
-        super("exit");
-    }
-
-    @Override
-    public void execute() {
-        System.out.println("Завершение программы...");
-        System.exit(0); // 0 обычно означает успешное завершение
-    }
-
-    @Override
-    public String getHelp() {
-        return "завершение программы (без сохранения в файл)";
+public class Exit {
+    public Response execute() {
+        System.out.println("Завершение работы сервера...");
+        return new Response(Response.Status.OK, "Server shutdown");
     }
 }

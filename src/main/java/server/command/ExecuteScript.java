@@ -1,65 +1,40 @@
 package server.command;
 
-import server.command.base.Command;
-import server.command.base.CommandManager;
-
+import server.collection.CollectionManager;
+import shared.dto.Request;
+import shared.dto.Response;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
-public class ExecuteScript extends Command {
+public class ExecuteScript {
+    private final CollectionManager collectionManager;
+    private final CommandProcessor commandProcessor;
 
-    private final CommandManager commandManager;
-    private String fileName;
-
-    public ExecuteScript(CommandManager commandManager) {
-        super("execute_script");
-        this.commandManager = commandManager;
+    public ExecuteScript(CollectionManager collectionManager, CommandProcessor commandProcessor) {
+        this.collectionManager = collectionManager;
+        this.commandProcessor = commandProcessor;
     }
 
-    @Override
-    public void execute() throws IllegalAccessException {
-        if (fileName == null || fileName.isEmpty()) {
-            System.err.println("Не указано имя файла для выполнения скрипта.");
-            return;
-        }
+    public Response execute(Request request) {
+        String filePath = (String) request.getData();
+        File scriptFile = new File(filePath);
 
-        File scriptFile = new File(fileName);
-
-        try (Scanner scanner = new Scanner(scriptFile)) {
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine().trim();
-                if (line.isEmpty()) continue;
-
-                String[] parts = line.split("\\s+", 2); // Разделяем по пробелам, максимум на 2 части
-                String commandName = parts[0];
-
-                if (commandManager.getCommandList().containsKey(commandName)) {
-                    Command command = commandManager.getCommandList().get(commandName);
-                    try {
-                        command.execute();
-                    } catch (Exception e) {
-                        System.err.println("Ошибка при выполнении команды '" + commandName + "' из скрипта: " + e.getMessage());
+        try (Scanner fileScanner = new Scanner(scriptFile)) {
+            while (fileScanner.hasNextLine()) {
+                String commandLine = fileScanner.nextLine().trim();
+                if (!commandLine.isEmpty()) {
+                    Response response = commandProcessor.processCommandLine(commandLine);
+                    if (response.getStatus() == Response.Status.ERROR) {
+                        return response;
                     }
-                } else {
-                    System.err.println("Неизвестная команда '" + commandName + "' в скрипте.");
                 }
             }
-            System.out.println("Скрипт '" + fileName + "' успешно выполнен.");
+            return new Response(Response.Status.OK, "Скрипт успешно выполнен");
         } catch (FileNotFoundException e) {
-            System.err.println("Файл скрипта не найден: " + fileName);
+            return new Response(Response.Status.ERROR, "Файл скрипта не найден");
         } catch (Exception e) {
-            System.err.println("Ошибка при чтении или выполнении скрипта: " + e.getMessage());
+            return new Response(Response.Status.ERROR, "Ошибка выполнения скрипта: " + e.getMessage());
         }
-        System.out.println("Выполнено успешно");
-    }
-
-    @Override
-    public String getHelp() {
-        return "считать и исполнить скрипт из указанного файла.";
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
     }
 }

@@ -1,37 +1,26 @@
 package server.command;
 
-import server.command.base.Command;
-import server.command.base.ReaderCreator;
-import shared.model.LabWork;
+import server.collection.CollectionManager;
+import shared.dto.Response;
+import shared.dto.Request;
 import shared.model.Person;
 
-import java.util.Iterator;
+public class RemoveAnyByAuthor {
+    private final CollectionManager collectionManager;
 
-import static server.command.base.CollectionManager.priorityQueue;
-
-public class RemoveAnyByAuthor extends Command implements ReaderCreator {
-    public RemoveAnyByAuthor() {
-        super("remove_any_by_author");
+    public RemoveAnyByAuthor(CollectionManager collectionManager) {
+        this.collectionManager = collectionManager;
     }
-    @Override
-    public void execute() throws IllegalAccessException {
-        System.out.println("Введите автора");
-        Person author = personReaderCreator();
-        Iterator<LabWork> iterator = priorityQueue.iterator();
-        //priorityQueue.removeIf(labWork -> labWork.getAuthor() == author);
-        boolean removed = false;
-        while (iterator.hasNext()) {
-            LabWork labWork = iterator.next();
-            if (!removed && labWork.getAuthor() == author) {
-                iterator.remove();
-                removed = true;
-            }
+
+    public Response execute(Request request) {
+        try {
+            Person author = (Person) request.getData();
+            boolean removed = collectionManager.removeAnyByAuthor(author);
+            return removed
+                    ? new Response(Response.Status.OK, "Элемент с указанным автором удален")
+                    : new Response(Response.Status.ERROR, "Элементы с указанным автором не найдены");
+        } catch (ClassCastException e) {
+            return new Response(Response.Status.ERROR, "Неверный формат данных автора");
         }
-        System.out.println("Выполнено успешно");
-    }
-
-    @Override
-    public String getHelp() {
-        return "удалить из коллекции один элемент, значение поля author которого эквивалентно заданному";
     }
 }

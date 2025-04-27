@@ -1,36 +1,27 @@
 package server.command;
-import Comand.base.*;
-import server.command.base.Command;
 
-import java.util.Scanner;
+import server.collection.CollectionManager;
+import shared.dto.Response;
+import shared.dto.Request;
+import shared.model.LabWork;
 
-import static server.command.base.CollectionManager.priorityQueue;
+public class RemoveLower {
+    private final CollectionManager collectionManager;
 
-public class RemoveLower extends Command {
-    public RemoveLower(){
-        super("remove_lower");
+    public RemoveLower(CollectionManager collectionManager) {
+        this.collectionManager = collectionManager;
     }
-    @Override
-    public void execute() {
-        long id;
-        Scanner in = new Scanner(System.in);
-        while (true) {
-            System.out.println("Введите id элемента, элементы меньшие которого хотите удалить");
-            try {
-                String input = in.nextLine();
-                id = Long.parseLong(input);
-                break;
-            } catch (NumberFormatException e) {
-                System.out.println("Ошибка: Некорректный формат числа. Пожалуйста, введите число long");
-            }
+
+    public Response execute(Request request) {
+        try {
+            LabWork compared = (LabWork) request.getData();
+            int removedCount = collectionManager.removeLower(compared);
+            return new Response(
+                    Response.Status.OK,
+                    "Удалено элементов: " + removedCount
+            );
+        } catch (ClassCastException e) {
+            return new Response(Response.Status.ERROR, "Неверный формат данных");
         }
-        long lastElementUnderDelete = id;
-        priorityQueue.removeIf(item -> item.getId() < lastElementUnderDelete);
-        System.out.println("Выполнено успешно");
     }
-
-    @Override
-    public String getHelp() {
-        return "удалить из коллекции все элементы, меньшие, чем заданный";
-    }
-}
+}}

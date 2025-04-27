@@ -1,27 +1,19 @@
 package server.command;
-import Comand.base.*;
-import server.command.base.Command;
 
-import static server.command.base.CommandManager.commandList;
+import shared.dto.Response;
+import java.util.Map;
 
-public class Help extends Command {
-    public Help() {
-        super("help");
-    }
-    @Override
-    public void execute() {
-        commandList.forEach((key, command) -> {
-            System.out.println(key + ": " + command.getHelp());
-        });
+public class Help {
+    private Map<String, String> commandList;
+
+    public Help(Map<String, String> commandList) {
+        this.commandList = commandList;
     }
 
-    @Override
-    public String getHelp() {
-        return "выводит справку по доступным командам";
+    public Response execute() {
+        StringBuilder sb = new StringBuilder("Доступные команды:\n");
+        commandList.forEach((name, desc) ->
+                sb.append(name).append(" - ").append(desc).append("\n"));
+        return new Response(Response.Status.OK, sb.toString());
     }
-
-   /* public static void register(HashMap<String,Command> stringCommandHashMap) {
-        Help help = new Help();
-        stringCommandHashMap.put(help.getName(), help);
-    }*/
 }

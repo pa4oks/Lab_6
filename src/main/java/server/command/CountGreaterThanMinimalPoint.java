@@ -1,41 +1,26 @@
 package server.command;
 
-import server.command.base.Command;
-import shared.model.LabWork;
+import server.collection.CollectionManager;
+import shared.dto.Response;
+import shared.dto.Request;
 
-import java.util.Iterator;
-import java.util.Scanner;
+public class CountGreaterThanMinimalPoint {
+    private final CollectionManager collectionManager;
 
-import static server.command.base.CollectionManager.priorityQueue;
-
-public class CountGreaterThanMinimalPoint extends Command {
-    public CountGreaterThanMinimalPoint() {
-        super("count_greater_than_minimal_point");
-    }
-    @Override
-    public void execute() throws IllegalAccessException {
-        System.out.println("Введите значение минимального пойнта: ");
-        Scanner in = new Scanner(System.in);
-        double minpoint = in.nextDouble();
-        Iterator<LabWork> iterator = priorityQueue.iterator();
-        int count = 0;
-        while (iterator.hasNext()) {
-            LabWork labWork = iterator.next();
-            if (labWork.getMinimalPoint() > minpoint) {
-                count++;
-            }
-        }
-        if (count == 0) {
-            System.out.println("Элементов с бо'льшими минимальными пойнтами нет");
-        }
-        else {
-            System.out.println(count);
-        }
-        System.out.println("Выполнено успешно");
+    public CountGreaterThanMinimalPoint(CollectionManager collectionManager) {
+        this.collectionManager = collectionManager;
     }
 
-    @Override
-    public String getHelp() {
-        return "вывести количество элементов, значение поля minimalPoint которых больше заданного";
+    public Response execute(Request request) {
+        try {
+            double minimalPoint = (double) request.getData();
+            long count = collectionManager.countGreaterThanMinimalPoint(minimalPoint);
+            return new Response(
+                    Response.Status.OK,
+                    "Количество элементов: " + count
+            );
+        } catch (ClassCastException e) {
+            return new Response(Response.Status.ERROR, "Неверный формат минимального значения");
+        }
     }
 }

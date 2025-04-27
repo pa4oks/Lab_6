@@ -1,21 +1,24 @@
 package server.command;
 
-import server.command.base.Command;
+import server.collection.CollectionManager;
+import shared.dto.Response;
 
-import static server.command.base.CollectionManager.priorityQueue;
+public class Clear {
+    private CollectionManager collectionManager;
 
-public class Clear extends Command {
-    public Clear() {
-        super("clear");
-    }
-    @Override
-    public void execute() throws IllegalAccessException {
-        priorityQueue.clear();
-        System.out.println("Выполнено успешно");
+    public Clear(CollectionManager collectionManager) {
+        this.collectionManager = collectionManager;
     }
 
-    @Override
-    public String getHelp() {
-        return "очистить коллекцию";
+    public Response execute() {
+        try {
+            int count = collectionManager.getCollection().size();
+            collectionManager.clearCollection();
+            return new Response(Response.Status.OK,
+                    "Коллекция очищена. Удалено элементов: " + count);
+        } catch (Exception e) {
+            return new Response(Response.Status.ERROR,
+                    "Ошибка очистки коллекции: " + e.getMessage());
+        }
     }
 }

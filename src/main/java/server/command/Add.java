@@ -1,67 +1,81 @@
 package server.command;
 
-import server.command.base.Command;
-import server.command.base.ReaderCreator;
-import shared.model.Difficulty;
-import shared.model.LabWork;
+import shared.model.*;
+import server.collection.CollectionManager;
+import shared.dto.Request;
+import shared.dto.Response;
 
-import java.util.Scanner;
+import java.time.LocalDate;
 
-import static server.command.base.CollectionManager.add;
+public class Add {
+    private final CollectionManager collectionManager;
 
-public class Add extends Command implements ReaderCreator {
-    public Add() {
-        super("add");
+    public Add(CollectionManager collectionManager) {
+        this.collectionManager = collectionManager;
     }
 
-    @Override
-    public void execute() throws IllegalAccessException  {
-        LabWork labworkNew = new LabWork();
-        Scanner in = new Scanner(System.in);
-        System.out.println("Введите имя: ");
-        labworkNew.setName(in.nextLine());
-        labworkNew.setCoordinates(coordinateReaderCreator());
+    public Response execute(Request request) {
+        try {
+            LabWork labWork = (LabWork) request.getData();
+            validateLabWork(labWork);
 
-        double minpoint;
-        while (true) {
-            System.out.println("Введите Минимальный Пойнт: ");
-            try {
-                String input = in.nextLine();
-                minpoint = Float.parseFloat(input);
-                break;
-            } catch (NumberFormatException e) {
-                System.out.println("Ошибка: Некорректный формат числа. Пожалуйста, введите число double");
+            // Проверяем, что ID не был установлен вручную
+            if (labWork.getId() != null) {
+                return new Response(Response.Status.ERROR, "ID генерируется автоматически и не может быть задан вручную");
             }
+
+            // Установка даты создания если не указана
+            if (labWork.getCreationDate() == null) {
+                labWork.setCreationDate(LocalDate.now());
+            }
+
+            collectionManager.add(labWork);
+            return new Response(Response.Status.OK, "Объект успешно добавлен", labWork);
+        } catch (IllegalArgumentException e) {
+            return new Response(Response.Status.ERROR, "Ошибка добавления: " + e.getMessage());
+        } catch (ClassCastException e) {
+            return new Response(Response.Status.ERROR, "Неверный формат данных");
         }
-        labworkNew.setMinimalPoint(minpoint);
-        Difficulty selectedDifficulty = null;
-        while (selectedDifficulty == null) {
-            System.out.println("Введите сложность: ");
-            for (Difficulty difficulty : Difficulty.values()) {
-                System.out.println(difficulty);
-            }
+    }
 
-            try {
-                selectedDifficulty = Difficulty.valueOf(in.nextLine());
-            } catch (IllegalArgumentException e) {
-                System.out.println("Ошибка: Некорректный ввод сложности. Пожалуйста, введите еще раз");
-            }
+    private void validateLabWork(LabWork labWork) {
+        if (labWork.getName() == null || labWork.getName().isEmpty()) {
+            throw new IllegalArgumentException("Название не может быть пустым");
         }
-
-        labworkNew.setDifficulty(selectedDifficulty);
-        labworkNew.setAuthor(personReaderCreator());
-
-        add(labworkNew);
-        System.out.println("Выполнено успешно");
+        if (labWork.getCoordinates() == null) {
+            throw new IllegalArgumentException("Координаты обязательны");
+        }
+        if (labWork.getDifficulty() == null) {
+            throw new IllegalArgumentException("Сложность обязательна");
+        }
+        if (labWork.getAuthor() == null) {
+            throw new IllegalArgumentException("Автор обязателен");
+        }
+        validateCoordinates(labWork.getCoordinates());
+        validatePerson(labWork.getAuthor());
     }
 
-    @Override
-    public String getHelp() {
-        return "добавляет новый labwork в коллекцию";
+    private void validateCoordinates(Coordinates coordinates) {
+        if (coordinates.getX() <= -423) {
+            throw new IllegalArgumentException("Координата X должна быть > -423");
+        }
+        if (coordinates.getY() == null) {
+            throw new IllegalArgumentException("Координата Y обязательна");
+        }
     }
 
-   /* public static void register(HashMap<String,Command> stringCommandHashMap) {
-        Add add = new Add();
-        stringCommandHashMap.put(add.getName(), help);
-    }*/
+    private void validatePerson(Person person) {
+        if (person.getName() == null || person.getName().isEmpty()) {
+            throw new IllegalArgumentException("Имя автора обязательно");
+        }
+        if (person.getWeight() != null && person.getWeight() <= 0) {
+            throw new IllegalArgumentException("Вес должен быть положительным");
+        }
+        if (person.getEyeColor() == null) {
+            throw new IllegalArgumentException("Цвет глаз обязателен");
+        }
+        if (person.getLocation() == null) {
+            throw new IllegalArgumentException("Локация обязательна");
+        }
+    }
 }

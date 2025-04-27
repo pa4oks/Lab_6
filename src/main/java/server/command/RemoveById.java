@@ -1,35 +1,26 @@
 package server.command;
 
-import server.command.base.Command;
+import server.collection.CollectionManager;
+import shared.dto.Response;
+import shared.dto.Request;
 
-import java.util.Scanner;
+public class RemoveById {
+    private final CollectionManager collectionManager;
 
-import static server.command.base.CollectionManager.removeByID;
-
-public class RemoveById extends Command {
-    public RemoveById() {
-        super("remove_by_id");
+    public RemoveById(CollectionManager collectionManager) {
+        this.collectionManager = collectionManager;
     }
-    @Override
-    public void execute() throws IllegalAccessException {
-        Scanner in = new Scanner(System.in);
-        long id;
-        while (true) {
-            System.out.println("Введите ID: ");
-            try {
-                String input = in.nextLine();
-                id = Long.parseLong(input);
-                break;
-            } catch (NumberFormatException e) {
-                System.out.println("Ошибка: Некорректный формат числа. Пожалуйста, введите число long");
-            }
+
+    public Response execute(Request request) {
+        try {
+            long id = (long) request.getData();
+            boolean removed = collectionManager.removeById(id);
+
+            return removed
+                    ? new Response(Response.Status.OK, "Элемент с ID " + id + " удален")
+                    : new Response(Response.Status.ERROR, "Элемент с ID " + id + " не найден");
+        } catch (ClassCastException e) {
+            return new Response(Response.Status.ERROR, "Неверный формат ID");
         }
-        removeByID(id);
-        System.out.println("Выполнено успешно");
-    }
-
-    @Override
-    public String getHelp() {
-        return " удалить элемент из коллекции по его id";
     }
 }

@@ -1,21 +1,21 @@
 package server.command;
 
-import server.command.base.Command;
+import server.collection.CollectionManager;
+import shared.dto.Response;
+import shared.model.LabWork;
 
-import static server.command.base.CollectionManager.priorityQueue;
+public class RemoveFirst {
+    private CollectionManager collectionManager;
 
-public class RemoveFirst extends Command {
-    public RemoveFirst() {
-        super("remove first");
-    }
-    @Override
-    public void execute() throws IllegalAccessException {
-        priorityQueue.poll();
-        System.out.println("Выполнено успешно");
+    public RemoveFirst(CollectionManager collectionManager) {
+        this.collectionManager = collectionManager;
     }
 
-    @Override
-    public String getHelp() {
-        return "удалить первый элемент из коллекции";
+    public Response execute() {
+        if (collectionManager.getCollection().isEmpty()) {
+            return new Response(Response.Status.ERROR, "Коллекция пуста");
+        }
+        LabWork removed = collectionManager.getCollection().poll();
+        return new Response(Response.Status.OK, "Удален элемент: " + removed.getName(), removed);
     }
 }
