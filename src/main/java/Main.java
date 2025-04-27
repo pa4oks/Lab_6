@@ -1,7 +1,8 @@
-import Comand.*;
-import Comand.base.*;
-import Model.LabWork;
+import shared.model.LabWork;
 import files.CSVCollectionManager;
+import server.command.ExecuteScript;
+import server.command.base.Command;
+import server.command.base.CommandManager;
 
 import java.util.HashMap;
 import java.util.List;
@@ -18,7 +19,7 @@ public class Main {
         System.out.println("Введите разделитель: ");
         String delimiter = in.nextLine();
 
-        CSVCollectionManager manager = new CSVCollectionManager(filePath, delimiter);
+         CSVCollectionManager manager = new CSVCollectionManager(filePath, delimiter);
 
         // Получаем коллекцию LabWork из CSVCollectionManager
         List<LabWork> labWorks = manager.getDataCollectionLabWork();
