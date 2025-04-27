@@ -120,7 +120,7 @@
       <workItem from="1743105283019" duration="1489000" />
       <workItem from="1743423296283" duration="2725000" />
       <workItem from="1744560439368" duration="951000" />
-      <workItem from="1745746419216" duration="1517000" />
+      <workItem from="1745746419216" duration="4198000" />
     </task>
     <task id="LOCAL-00001" summary="bupe">
       <option name="closed" value="true" />
@@ -202,11 +202,30 @@
       <option name="project" value="LOCAL" />
       <updated>1745747394506</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="git commit">
+      <option name="closed" value="true" />
+      <created>1745748023664</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1745748023664</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="bupe" />
